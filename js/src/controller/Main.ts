@@ -1,21 +1,27 @@
 declare namespace App.controller {
     interface Main extends Ext.app.Controller.Def {
         myStaticMethod? (myParam?: number): boolean;
-        treesWrappers: object[];
+        treesWrappers: App.view.layout.SideTree[];
         mainTabs: object;
         getLeftAccPanel (): Ext.panel.Panel;
         getMainTabs (): Ext.tab.Panel;
+        fillSideAccordionWithPanelTitles(treesServicesData: App.controller.TreesServiceItem[]): void;
         createSidePanelWrapper (treesServicesData: TreesServiceItem[], iLocal:number): App.view.layout.SideTreePanel;
         createSidePanelTree (serviceUrl: string): App.view.layout.SideTree;
-        createTabCtrlAndviewIfNecessary(): void;
+        createTabCtrlAndviewIfNecessary(record: Ext.data.Model): void;
     }
     interface TreesServiceItem {
         serviceUrl: string;
         title: string;
     }
+    interface RecordData {
+        id: number;
+        controller: string;
+        text: string;
+    }
 }
 
-Ext.define('MyApp.controller.Main', <App.controller.Main | Ext.base.Configs>{
+Ext.define('App.controller.Main', <App.controller.Main & object>{
     extend: 'Ext.app.Controller',
     requires: [
 		'App.controller.MainTab'
@@ -32,26 +38,30 @@ Ext.define('MyApp.controller.Main', <App.controller.Main | Ext.base.Configs>{
         }, {
         	ref: 'mainTabs',
         	selector: 'tabpanel[cls=main-tabs]'
-        }],
-        init: function () {
-            this.treesWrappers = [];
-            this.mainTabs = {};
-        },
-        onLaunch: function () {
-            // load info for trees:
-            Ext.data.JsonP.request({
-                url: "https://trainings.tomflidr.cz/extjs/app/admin/portal/trees-services",
-                success: (treesServicesData: App.controller.TreesServiceItem[]) => {
-                    this.fillSideAccordionWithPanelTitles(treesServicesData);
-                }
-            });
-        }
+        }]
+    },
+    init: function () {
+        this.treesWrappers = [];
+        this.mainTabs = {};
+        this.callParent(arguments);
+    },
+    onLaunch: function (application: Ext.app.Application) {
+        // load info for trees:
+        Ext.data.JsonP.request(<Ext.Ajax.methodParams.request.Options>{
+            url: "https://trainings.tomflidr.cz/extjs/app/admin/portal/trees-services",
+            success: (treesServicesData: App.controller.TreesServiceItem[]) => {
+                this.fillSideAccordionWithPanelTitles(treesServicesData);
+            }
+        });
+        this.callParent(arguments);
     },
     fillSideAccordionWithPanelTitles: function (treesServicesData: App.controller.TreesServiceItem[]) {
     	for (var i = 0; i < treesServicesData.length; i++) {
     		var accWrapper = this.createSidePanelWrapper(treesServicesData, i);
     		if (i === 0) {
-    			var tree = this.createSidePanelTree(treesServicesData[0].serviceUrl);
+    			var tree:App.view.layout.SideTree = this.createSidePanelTree(
+                    treesServicesData[0].serviceUrl
+                );
     			console.log(tree);
     			accWrapper.add(tree);
     			accWrapper.firstExpanded = true;
@@ -62,20 +72,23 @@ Ext.define('MyApp.controller.Main', <App.controller.Main | Ext.base.Configs>{
     	}
     	this.getLeftAccPanel().add(this.treesWrappers);
     },
-    createSidePanelWrapper: function (treesServicesData, iLocal) {
+    createSidePanelWrapper: function (treesServicesData: App.controller.TreesServiceItem[], iLocal: number) {
+        var handler = (p: Ext.panel.Panel, eOpts: object) => {
+            var accWrapper = this.treesWrappers[iLocal];
+            if (accWrapper.firstExpanded) return;
+            var tree:App.view.layout.SideTree = this.createSidePanelTree(
+                treesServicesData[iLocal].serviceUrl
+            );
+            accWrapper.firstExpanded = true;
+            accWrapper.add(tree);
+        };
     	return Ext.create('App.view.layout.SideTreePanel', {
     		title: treesServicesData[iLocal].title,
-    		listeners: {
-    			expand: {
+    		listeners: <Ext.panel.Panel.Events>{
+    			expand: <Ext.base.EventConfig>{
     				single: true,
-    				fn: () => {
-    					var accWrapper = this.treesWrappers[iLocal];
-    					if (accWrapper.firstExpanded) return;
-    					var tree = this.createSidePanelTree(treesServicesData[iLocal].serviceUrl);
-    					accWrapper.firstExpanded = true;
-    					accWrapper.add(tree);
-    				},
-					scope:this
+    				fn: handler,
+					scope: this
     			}
     		}
     	});
@@ -92,14 +105,15 @@ Ext.define('MyApp.controller.Main', <App.controller.Main | Ext.base.Configs>{
                 this.createTabCtrlAndviewIfNecessary(record);
             }
         };
-    	var treePanel = Ext.create('App.view.layout.SideTree', <Ext.tree.Panel.Cfg>{
+    	var treePanel:App.view.layout.SideTree = Ext.create('App.view.layout.SideTree', <Ext.tree.Panel.Cfg>{
             store: treeStore,
             listeners: treePanelListeners
-    	});
+    	}) as App.view.layout.SideTree;
     	return treePanel;
     },
-    createTabCtrlAndviewIfNecessary: function (record) {
-    	var id = record.data.id;
+    createTabCtrlAndviewIfNecessary: function (record: Ext.data.Model) {
+        var recordData:App.controller.RecordData = record.getData() as App.controller.RecordData;
+    	var id = recordData.id;
     	if (this.mainTabs[id]) return;
 
     	var tabView:App.view.layout.MainTab;
@@ -110,14 +124,14 @@ Ext.define('MyApp.controller.Main', <App.controller.Main | Ext.base.Configs>{
     	//var tabCtrl = Ext.create('App.controller.MainTab', ctrlCfg);
     	//
     	var tabCtrl:App.controller.MainTab = Ext.create(
-            record.data.controller, ctrlCfg
+            recordData.controller, ctrlCfg
         ) as App.controller.MainTab;
         tabCtrl.init(ctrlCfg);
         var tabViewListeners = <Ext.panel.Panel.Events>{
-            beforeclose: function (panel: Ext.panel.Panel & App.controller.MainTab, eOpts: object): boolean {
-                if (panel.getChanged()) {
+            beforeclose: (panel: Ext.panel.Panel & App.view.layout.MainTab, eOpts: object): boolean => {
+                if (panel.ctrl.getChanged()) {
                     if (!window.confirm("really?")) 
-                        return false; // zamezí spuštění close
+                        return false; // prevents running close event
                 }
                 return true;
             },
@@ -128,8 +142,8 @@ Ext.define('MyApp.controller.Main', <App.controller.Main | Ext.base.Configs>{
             }
         };
     	tabView = Ext.create(
-			record.data.controller.replace('.controller.', '.view.'), {
-    			title: record.data.text,
+			recordData.controller.replace('.controller.', '.view.'), {
+    			title: recordData.text,
     			listeners: tabViewListeners
 			}
 		) as App.view.layout.MainTab;

@@ -1,4 +1,4 @@
-// Debugging in browser:
+// To debugg in browser, change disableCaching to false:
 Ext.Loader.setConfig({
 	disableCaching: !true
 });
@@ -20,17 +20,7 @@ Ext.application(<Ext.app.Application.Cfg>{
         'Main'
     ],
     launch: function () {
-        //App.libs.AjaxHandlers.Init();
+        App.libs.AjaxHandlers.Init();
         return true;
-    },
-    onAppUpdate: function () {
-        Ext.MessageBox.confirm(
-            'Application Update', 'This application has an update, reload?',
-            function (choice: string) {
-                if (choice === 'yes') 
-                    window.location.reload();
-            },
-            this
-        );
     }
 });

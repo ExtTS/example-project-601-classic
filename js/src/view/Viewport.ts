@@ -1,16 +1,18 @@
-Ext.define('MyApp.view.Viewport', <Ext.container.Viewport.Def>{
+Ext.define('App.view.Viewport', <Ext.container.Viewport.Def>{
 	extend: 'Ext.Viewport',
     requires: [
 		'App.view.layout.MainTab',
         'App.view.layout.SideTreePanel'
-    ],
-	layout: 'fit',
-	style: {
-		margin: '0 0 0 10px',
+	],
+	config: <Ext.container.Viewport.Cfg | Ext.layout.FitLayout>{
+		layout: 'fit',
+		style: {
+			margin: '0 0 0 10px',
+		}
 	},
     items: <Ext.container.Container.Cfg | Ext.layout.BorderLayout>{
     	xtype: 'container',
-		//layout: 'border',
+		layout: 'border',
 		id: 'cont',
 		items: [
 			<Ext.tab.Panel.Cfg>{
@@ -18,7 +20,7 @@ Ext.define('MyApp.view.Viewport', <Ext.container.Viewport.Def>{
 				xtype: 'tabpanel',
 				cls: 'main-tabs',
 				region: 'center',
-				items: [] // bude naplněno z main ctrl
+				items: [] // will be completed in main ctrl
 			}, 
 			<Ext.panel.Panel.Cfg | Ext.layout.AccordionLayout>{
 				id: 'left',

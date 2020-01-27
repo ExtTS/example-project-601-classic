@@ -1,22 +1,24 @@
 declare namespace App.model {
 	var Page: App.model.Page;
 	interface Page extends Ext.app.ViewModel.Def {
-		loadByIdAndModule?: (id: string | number, module: string, cb: Function) => void;
+		loadByIdAndModule?: (id: string | number, module: string, cb: (mmodel:App.model.Page) => void) => void;
 	}
 }
 
 Ext.define('App.model.Page', <App.model.Page>{
 	extend: 'Ext.app.ViewModel',
 	statics: {
-		loadByIdAndModule: function (id: string | number, module: string, cb: Function):void {
-			Ext.data.JsonP.request({
+		loadByIdAndModule: function (id: string | number, module: string, cb: (mmodel:App.model.Page) => void):void {
+			Ext.data.JsonP.request(<Ext.Ajax.methodParams.request.Options>{
 				url: 'https://trainings.tomflidr.cz/extjs/app/admin/documents/read',
 				params: {
 					id: id,
 					module: module
 				},
-    			success: function (response, opts) {
-    				var model = Ext.create('App.model.Page', response.data);
+    			success: function (response:any, opts:object) {
+    				var model:App.model.Page = Ext.create(
+						'App.model.Page', response.data
+					) as App.model.Page;
     				cb(model);
     			}
     		});

@@ -6,7 +6,7 @@ declare namespace App.view.layout {
     }
 }
 
-Ext.define('App.view.layout.MainTab', <App.view.layout.MainTab | Ext.panel.Panel.Cfg>{
+Ext.define('App.view.layout.MainTab', <App.view.layout.MainTab & Ext.panel.Panel.Cfg>{
     extend: 'Ext.panel.Panel',
     alias: 'widget.main-tab',
     config: <Ext.panel.Panel.Cfg>{

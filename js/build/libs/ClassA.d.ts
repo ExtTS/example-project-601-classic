@@ -1,7 +1,7 @@
 export declare class ClassA {
     name: string;
     static Test(): void;
-    static KONSTANTA: number;
+    static CONSTANT: number;
     constructor();
     handler(): void;
 }

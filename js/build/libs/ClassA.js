@@ -10,7 +10,7 @@ define(["require", "exports", "libs/subs/ClassB"], function (require, exports, C
         };
         ClassA.prototype.handler = function () {
         };
-        ClassA.KONSTANTA = 5;
+        ClassA.CONSTANT = 5;
         return ClassA;
     }());
     exports.ClassA = ClassA;

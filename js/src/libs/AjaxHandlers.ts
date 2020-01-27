@@ -1,4 +1,5 @@
 declare namespace App.libs {
+	var AjaxHandlers:App.libs.AjaxHandlers;
     interface AjaxHandlers extends Ext.Class.Cfg {
         Init? (): void;
     }
@@ -7,7 +8,7 @@ declare namespace App.libs {
 Ext.define('App.libs.AjaxHandlers', <Ext.Class.Cfg>{
 	statics: {
 		Init: function ():void {
-			Ext.Ajax.on('requestexception', function (conn, response, options) {
+			Ext.Ajax.on('requestexception', function (conn:Ext.data.Connection, response:Object, options: Object, eOpts : Object) {
 				//
 			});
 			window.onerror = function (message, source, lineno, colno, error) {
@@ -15,7 +16,6 @@ Ext.define('App.libs.AjaxHandlers', <Ext.Class.Cfg>{
 				// location.href
 				// navigator.userAgent
 				// navigator.platform
-				
 			}
 		}
 	}

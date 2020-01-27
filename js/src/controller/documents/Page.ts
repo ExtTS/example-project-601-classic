@@ -1,10 +1,9 @@
 declare namespace App.controller.documents {
 	interface Page extends App.controller.MainTab {
-		model: any;
-		form: Ext.form.BasicForm;
+		model: App.model.Page;
+		form: Ext.form.Basic;
 		init (cfg: object): void;
-		save (): void;
-		onLaunch (): void;
+		save (): never;
 	}
 }
 
@@ -20,7 +19,7 @@ Ext.define('App.controller.documents.Page', <App.controller.documents.Page>{
 		App.model.Page.loadByIdAndModule(
 			cfg.record.data.i, 
 			cfg.record.data.m, 
-			(model) => {
+			(model:App.model.Page) => {
 				this.model = model;
 				
 				// @ts-ignore
@@ -39,13 +38,13 @@ Ext.define('App.controller.documents.Page', <App.controller.documents.Page>{
 	},
 
 	save: function () {
-		var values = this.form.getValues();
+		var values:object = this.form.getValues(false, false, false, true) as object;
 		console.log(values);
-		this.model.setValues(values);
+		this.model.setData(values);
 		//this.model.save();
 	},
 
-    onLaunch: function () {
+    onLaunch: function (application: Ext.app.Application) {
     	// this.config
 
     	//this.callParent(arguments);

@@ -5,22 +5,22 @@ declare namespace App.controller {
 		setChanged (changed: boolean): void;
 		getChanged (): boolean;
 		init (config: object): void;
-		save (): void;
+		save (): never;
     }
 }
 
-Ext.define('App.controller.MainTab', <App.controller.MainTab | Ext.base.Configs>{
+Ext.define('App.controller.MainTab', <App.controller.MainTab>{
     extend: 'Ext.app.ViewController',
     config: {
 		// record z Main ctrl
 	},
 	changed: false,
-    onLaunch: function () {
-    	//this.callParent(arguments);
+    onLaunch: function (application: Ext.app.Application) {
+    	this.callParent(arguments);
     },
     setChanged: function (changed?: boolean) {
     	if (!this.changed && changed) {
-    		this.tabView.setTitle('*&nbsp;' + this.tabView.getTitle());
+			this.tabView.setTitle('*&nbsp;' + this.tabView.getTitle());
     	}
     	this.changed = changed || true;
     },
@@ -29,7 +29,6 @@ Ext.define('App.controller.MainTab', <App.controller.MainTab | Ext.base.Configs>
     },
 
 	save: function () {
-		throw "not implemented";
+		throw new Error("not implemented");
 	}
-
 });
